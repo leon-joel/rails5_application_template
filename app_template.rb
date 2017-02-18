@@ -3,8 +3,7 @@
 #
 # WARNING: 
 #   MinGW環境では動作しそうだが(wgetを別途インストールすれば）、なぜか yes?のあたりで止まってしまう。
-#   Windows環境では erb2haml が「変換前のファイルを削除出来ない」という問題だけが残っている。
-#     ※内部で rm コマンドを呼び出しているからかな。 https://github.com/dhl/erb2haml/blob/master/lib/erb2haml/railties/erb2haml.rake
+#   Windows環境でも正常に動作するよう erb2haml を自前のものに置き換えているので注意。
 # 
 # USAGE:
 #   # PostgreSQL
@@ -67,6 +66,9 @@ append_file 'Gemfile', <<~CODE
   gem 'bootswatch-rails'
   gem 'font-awesome-rails'
 
+  # http://www.mk-mode.com/octopress/2015/01/08/rails-installation-bootstrap-bootswatch/
+  gem 'autoprefixer-rails'
+
   # turbolinks support
   # gem 'jquery-turbolinks'
 
@@ -114,7 +116,7 @@ append_file 'Gemfile', <<~CODE
   # end
 
   # NewRelic
-  gem 'newrelic_rpm'
+  # gem 'newrelic_rpm'
 
   # Hash extensions
   # gem 'hashie'
@@ -161,6 +163,7 @@ append_file 'Gemfile', <<~CODE
 
     # Rspec
     gem 'rspec-rails'
+    gem 'rails-controller-testing'  # for assigns method ※https://github.com/rails/rails-controller-testing
 
     # test fixture
     gem 'factory_girl_rails'
