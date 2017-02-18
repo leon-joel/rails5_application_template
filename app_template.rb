@@ -300,7 +300,8 @@ get 'https://raw.githubusercontent.com/svenfuchs/rails-i18n/master/rails/locale/
 # erb => haml
 # ※windows対応の為、自前で修正したerb2hamlを使用する
 Bundler.with_clean_env do
-  run 'bundle exec rake hamlleon:replace_erbs'
+  # run 'bundle exec rake hamlleon:replace_erbs'
+  rake "hamlleon:replace_erbs"
 end
 
 # Bootstrap/Bootswach/Font-Awesome
@@ -333,7 +334,7 @@ generate 'kaminari:config'
 # end
 
 Bundler.with_clean_env do
-  run 'bundle exec rake db:create'
+  rake "db:create"
 end
 
 # Unicorn(App Server)
