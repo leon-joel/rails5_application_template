@@ -211,6 +211,7 @@ if use_mongodb
     <<~CODE
 
     # Mongoid
+    gem 'mongoid'
     gem 'kaminari-mongoid'
     group :development, :test do
       gem 'mongoid-rspec', github: "chocoken517/mongoid-rspec"
