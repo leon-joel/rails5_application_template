@@ -220,6 +220,29 @@ if use_mongodb
   end
 end
 
+#
+# Remote debug
+# ※ruby2.3以降で、ruby-debug-ide のインストール（ビルド）時に以下エラーが発生した。
+#    Gem::Ext::BuildError: ERROR: Failed to build gem native extension.
+#       can't modify frozen String
+# ※但し、手動でgem install したら何事もなくインストールできた…（原因不明）
+# ----------------------------------------------------------------
+if os == :macosx || os == :linux
+  append_file 'Gemfile' do
+    <<~CODE
+      group :development do
+        gem 'ruby-debug-ide'
+        gem 'debase'
+      end
+    CODE
+  end
+
+  get File.expand_path('../root/run_rdebug', __FILE__), './run_rdebug'
+end
+
+#
+# bundle install
+# ----------------------------------------------------------------
 Bundler.with_clean_env do
   # run 'bundle install --path vendor/bundle --jobs=4'
   run 'bundle install --jobs=2'
@@ -480,6 +503,8 @@ end
 
 # run 'wget https://raw.githubusercontent.com/morizyun/rails4_template/master/config/initializers/redis.rb -P config/initializers/'
 # end
+
+
 
 # git init
 # ----------------------------------------------------------------

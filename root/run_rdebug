@@ -1,0 +1,2 @@
+#!/bin/bash
+bin/bundle exec rdebug-ide --port 1234 --dispatcher-port 26162 --host 0.0.0.0 bin/rails s
