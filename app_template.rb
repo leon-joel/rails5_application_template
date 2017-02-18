@@ -305,7 +305,8 @@ end
 
 # Bootstrap/Bootswach/Font-Awesome
 remove_file 'app/assets/stylesheets/application.css'
-get 'https://raw.githubusercontent.com/leon-joel/rails5_application_template/master/app/assets/stylesheets/application.css.scss', 'app/assets/stylesheets/application.css.scss'
+# get 'https://raw.githubusercontent.com/leon-joel/rails5_application_template/master/app/assets/stylesheets/application.css.scss', 'app/assets/stylesheets/application.css.scss'
+get File.expand_path('../app/assets/stylesheets/application.css.scss', __FILE__), 'app/assets/stylesheets/application.css.scss'
 
 # Simple Form
 # generate 'simple_form:install'
