@@ -88,7 +88,8 @@ append_file 'Gemfile', <<~CODE
   # gem 'slim-rails'
 
   # Haml
-  gem 'haml-rails'
+  gem 'hamlit-rails'
+  # gem 'haml-rails'
   group :development do
     # gem 'erb2haml'
     gem 'erb2haml-leon', '>= 0.1.5.7', github: 'leon-joel/erb2haml-leon'
