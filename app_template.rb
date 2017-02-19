@@ -336,6 +336,12 @@ remove_file 'app/assets/stylesheets/application.css'
 # get 'https://raw.githubusercontent.com/leon-joel/rails5_application_template/master/app/assets/stylesheets/application.css.scss', 'app/assets/stylesheets/application.css.scss'
 get File.expand_path('../app/assets/stylesheets/application.css.scss', __FILE__), 'app/assets/stylesheets/application.css.scss'
 
+insert_into_file 'app/assets/javascripts/application.js', <<~EOS.chomp!, after: %r(^//= require jquery$)
+
+  //= require bootstrap-sprockets
+  EOS
+  
+
 # Simple Form
 # generate 'simple_form:install'
 generate 'simple_form:install --bootstrap'
