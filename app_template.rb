@@ -2,12 +2,12 @@
 
 #
 # WARNING: 
-#   MinGW環境では動作しそうだが(wgetを別途インストールすれば）、なぜか yes?のあたりで止まってしまう。
-#   Windows環境でも正常に動作するよう erb2haml を自前のものに置き換えているので注意。
+#   MinGW環境では動作しない。※なぜか yes? のあたりで止まってしまう。
+#   Windows環境（cmd.exe）でも正常に動作するよう erb2haml を自前のものに置き換えているので注意。
 # 
 # USAGE:
 #   # PostgreSQL
-#   $ rails new test_app --database=postgresql --skip-test --skip-bundle -m my_rails5_app_template.rb
+#   $ rails new test_app --database=postgresql --skip-test --skip-bundle --skip-action-cable -m <path_to_this_file>
 #
 # ※Rails4の場合は --skip-test ではなく --skip-test-unit
 # ※ActiveRecordを使わない場合は --skip-active-record
@@ -142,6 +142,10 @@ append_file 'Gemfile', <<~CODE
 
     # Rack Profiler
     # gem 'rack-mini-profiler'
+
+    # for Debug
+    gem 'ruby-debug-ide'
+    gem 'debase'
 
     # Error時の表示を分かりやすく
     gem 'better_errors'
@@ -280,12 +284,13 @@ application  do
       g.test_framework  :rspec, :fixture => true
       g.fixture_replacement :factory_girl, :dir => "spec/factories"
       g.view_specs false
-      g.controller_specs true
+      g.controller_specs false
       g.routing_specs false
       g.helper_specs false
       g.request_specs false
       g.assets false
       g.helper false
+      g.jbuilder false
     end
 
     # # libファイルの自動読み込み
@@ -317,7 +322,8 @@ end
 #     }
 # ), after: 'config.active_record.dump_schema_after_migration = false'
 
-# set Japanese locale
+# get locale dictionaries
+get 'https://raw.githubusercontent.com/svenfuchs/rails-i18n/master/rails/locale/en.yml', 'config/locales/en.yml'
 get 'https://raw.githubusercontent.com/svenfuchs/rails-i18n/master/rails/locale/ja.yml', 'config/locales/ja.yml'
 
 # erb => slim
