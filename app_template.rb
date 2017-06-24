@@ -45,8 +45,8 @@ use_mongodb = yes?('Use MongoDB? [yes or ELSE]')
 # run 'rm README.rdoc'
 
 # .gitignore
-# run 'gito -u'   # giboはignore情報をローカルに保持しているので、たまにはそれらを更新してあげた方がいい
-run 'gibo Windows macOS Ruby Rails Sass JetBrains SublimeText Vagrant VisualStudioCode > .gitignore' rescue nil
+run 'gibo -u'   # giboはignore情報をローカルに保持しているので、まずそれを更新。
+run 'gibo Windows macOS Linux Ruby Rails Sass Vagrant JetBrains SublimeText Emacs Vim VisualStudioCode TortoiseGit > .gitignore' rescue nil
 gsub_file '.gitignore', /^config\/initializers\/secret_token.rb$/, ''
 gsub_file '.gitignore', /config\/secret.yml/, ''
 
@@ -322,7 +322,7 @@ end
 #     }
 # ), after: 'config.active_record.dump_schema_after_migration = false'
 
-# get locale dictionaries
+# get locale dictionaries from https://github.com/svenfuchs/rails-i18n
 get 'https://raw.githubusercontent.com/svenfuchs/rails-i18n/master/rails/locale/en.yml', 'config/locales/en.yml'
 get 'https://raw.githubusercontent.com/svenfuchs/rails-i18n/master/rails/locale/ja.yml', 'config/locales/ja.yml'
 
