@@ -56,7 +56,7 @@ insert_into_file 'Gemfile', <<~EOS, after: "source 'https://rubygems.org'"
 
   ruby '#{ruby_version}'
 EOS
-run "echo '#{ruby_version}' > ./.ruby-version"
+run "echo #{ruby_version} > ./.ruby-version"
 
 # add to Gemfile
 append_file 'Gemfile', <<~CODE
