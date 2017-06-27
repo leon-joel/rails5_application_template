@@ -58,6 +58,13 @@ insert_into_file 'Gemfile', <<~EOS, after: "source 'https://rubygems.org'"
 EOS
 run "echo #{ruby_version} > ./.ruby-version"
 
+# for rdebug
+create_file 'run_rdebug', <<~EOS
+  #!/bin/bash
+  bundle exec rdebug-ide --port 1234 --dispatcher-port 26162 --host 0.0.0.0 bin/rails s
+EOS
+
+
 # add to Gemfile
 append_file 'Gemfile', <<~CODE
 
@@ -226,24 +233,27 @@ if use_mongodb
 end
 
 #
+# OSに関係なくインストールしても大丈夫のようなのでコメント化。run_rdebugは上の方で入れている。
+#
 # Remote debug
 # ※ruby2.3以降で、ruby-debug-ide のインストール（ビルド）時に以下エラーが発生した。
 #    Gem::Ext::BuildError: ERROR: Failed to build gem native extension.
 #       can't modify frozen String
 # ※但し、手動でgem install したら何事もなくインストールできた…（原因不明）
 # ----------------------------------------------------------------
-if os == :macosx || os == :linux
-  append_file 'Gemfile' do
-    <<~CODE
-      group :development do
-        gem 'ruby-debug-ide'
-        gem 'debase'
-      end
-    CODE
-  end
+#if os == :macosx || os == :linux
+#  append_file 'Gemfile' do
+#    <<~CODE
+#      group :development do
+#        gem 'ruby-debug-ide'
+#        gem 'debase'
+#      end
+#    CODE
+#  end
+#
+#  get File.expand_path('../root/run_rdebug', __FILE__), './run_rdebug'
+#end
 
-  get File.expand_path('../root/run_rdebug', __FILE__), './run_rdebug'
-end
 
 #
 # bundle install
@@ -323,7 +333,7 @@ end
 # ), after: 'config.active_record.dump_schema_after_migration = false'
 
 # get locale dictionaries from https://github.com/svenfuchs/rails-i18n
-get 'https://raw.githubusercontent.com/svenfuchs/rails-i18n/master/rails/locale/en.yml', 'config/locales/en.yml'
+get 'https://raw.githubusercontent.com/svenfuchs/rails-i18n/master/rails/locale/en.yml', 'config/locales/en.yml', force: true
 get 'https://raw.githubusercontent.com/svenfuchs/rails-i18n/master/rails/locale/ja.yml', 'config/locales/ja.yml'
 
 # erb => slim
