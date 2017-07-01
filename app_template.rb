@@ -400,7 +400,8 @@ end
 # Rspec
 generate 'rspec:install'
 
-run "echo '--color -f d' > .rspec"
+# does not work on Ubuntu
+# run "echo '--color -f d' > .rspec"
 
 gsub_file 'spec/spec_helper.rb', "require 'rspec/autorun'", ''
 
