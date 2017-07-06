@@ -175,6 +175,7 @@ append_file 'Gemfile', <<~CODE
 
     # Rspec
     gem 'rspec-rails'
+    gem 'spring-commands-rspec'
     gem 'rails-controller-testing'  # for assigns method ※https://github.com/rails/rails-controller-testing
 
     # test fixture
@@ -399,6 +400,8 @@ end
 # ----------------------------------------------------------------
 # Rspec
 generate 'rspec:install'
+
+run 'bundle exec spring binstub rspec'
 
 # does not work on Ubuntu
 # run "echo '--color -f d' > .rspec"
