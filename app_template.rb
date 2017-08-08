@@ -374,6 +374,7 @@ generate 'simple_form:install --bootstrap'
 
 # Kaminari config
 generate 'kaminari:config'
+generate 'kaminari:views bootstrap3'
 
 # Database
 # run 'rm -rf config/database.yml'
