@@ -5,13 +5,45 @@
 #   MinGW環境では動作しない。※なぜか yes? のあたりで止まってしまう。
 #   Windows環境（cmd.exe）でも正常に動作するよう erb2haml を自前のものに置き換えているので注意。
 # 
+# 準備
+#   色々アップデート
+#     # Update Homebrew
+#     $ brew update
+#
+#     # Generate modern .gitignore
+#     $ brew install wget gibo
+#
+#     # .gitignoreテンプレートのアップデート ※一度はこれをやっておかないとrails new 時にエラーになる？
+#     $ gibo -u
+#
+#   Ruby/Railsのインストール
+#     # Update ruby-build
+#     $ brew upgrade ruby-build
+#
+#     # Show some ruby versions which rbenv can install
+#     $ rbenv install --list
+#
+#     # Install latest Ruby(e.g. 2.3.1)
+#     $ rbenv install 2.3.1
+#
+#     # Install rails
+#     $ gem install rails
+#     # or specific version.
+#     $ gem install rails -v 5.0.0.1
+#
+#   Rubyのバージョン指定(rbenv)
+#     $ echo "2.5.0" > .ruby-version
+#
 # USAGE:
-#   # PostgreSQL
-#   $ rails new test_app --database=postgresql --skip-test --skip-bundle --skip-action-cable -m <path_to_this_file>
 #
-# ※Rails4の場合は --skip-test ではなく --skip-test-unit
-# ※ActiveRecordを使わない場合は --skip-active-record
+#   # ■for PostgreSQL (database省略時はSQLite)
+#   # 内部で明示的に bundle install しているので、--skip-bundle は効かない。
+#   $ rails new test_app --database=postgresql --skip-test --skip-action-mailer --skip-action-cable -m <path_to_this_file>
 #
+#   # ■ActiveRecordを使わない場合
+#   $ rails new test_app --skip-active-record --skip-test --skip-action-mailer --skip-action-cable -m <path_to_this_file>
+#
+#   ※Rails4の場合は --skip-test ではなく --skip-test-unit
 
 require 'bundler'
 
@@ -179,7 +211,7 @@ append_file 'Gemfile', <<~CODE
     gem 'rails-controller-testing'  # for assigns method ※https://github.com/rails/rails-controller-testing
 
     # test fixture
-    gem 'factory_girl_rails'
+    gem 'factory_bot_rails'   # factory_girl からリネームされた
 
     # Deploy
     # gem 'capistrano', '~> 3.2.1'
@@ -206,8 +238,9 @@ append_file 'Gemfile', <<~CODE
 
     gem 'capybara'          # for feature spec
     gem 'launchy'           # Capybaraでテスト中に現在のページをブラウザで開ける
-
-    gem 'poltergeist'       # headless driver
+    gem 'selenium-webdriver'
+    gem 'chromedriver-helper'
+    # gem 'poltergeist'       # headless driver ※Rails5.1 ではもはやchromedriver以外使う意味がない？
   end
 
   group :production, :staging do
@@ -293,7 +326,7 @@ application  do
       g.orm :active_record
       g.template_engine :haml
       g.test_framework  :rspec, :fixture => true
-      g.fixture_replacement :factory_girl, :dir => "spec/factories"
+      g.fixture_replacement :factory_bot, :dir => "spec/factories"
       g.view_specs false
       g.controller_specs false
       g.routing_specs false
@@ -409,18 +442,37 @@ run 'bundle exec spring binstub rspec'
 
 gsub_file 'spec/spec_helper.rb', "require 'rspec/autorun'", ''
 
-insert_into_file 'spec/spec_helper.rb', before: 'RSpec.configure do |config|' do
+insert_into_file 'spec/rails_helper.rb', before: 'RSpec.configure do |config|' do
   <<~EOS
   Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
 
-  require 'factory_girl_rails'
-  require 'capybara/poltergeist'
+  require 'factory_bot_rails'
+  # require 'capybara/poltergeist'
 
   EOS
 end
 
-insert_into_file 'spec/spec_helper.rb', after: 'RSpec.configure do |config|' do
+insert_into_file 'spec/rails_helper.rb', after: 'RSpec.configure do |config|' do
   # mongodbを使用する場合の変数を定義
+  system_test_case = <<~EOS
+    if example.metadata[:type] == :system
+      # driven_by :selenium_chrome_headless
+      # driven_by :selenium_chrome_headless, screen_size: [1400, 1000]
+      # ↑screen_sizeをセットすると Capybara::ElementNotFound: エラーが出るようになる
+
+      # js: true の場合にのみ chrome を使うようにする方法 参考: https://qiita.com/jnchito/items/c7e6e7abf83598a6516d
+      # ※js:true のテストでしか「エラー時の自動スクショ」が取られないというデメリットが有る。
+      # ※その代わり速い！トータル30秒➾20秒くらいになった。
+      if example.metadata[:js]
+        # driven_by :selenium_chrome_headless, screen_size: [1400, 1000]
+        driven_by :selenium_chrome_headless
+        # driven_by :selenium   # chromeウィンドウが表示される
+      else
+        driven_by :rack_test
+      end
+    end
+  EOS
+
   if use_mongodb
     mongo_before_suite = <<~EOS
       # memo: https://blog.hello-world.jp.net/ruby/1024/
@@ -434,7 +486,6 @@ insert_into_file 'spec/spec_helper.rb', after: 'RSpec.configure do |config|' do
     mongo_after_each = <<~EOS
       # DatabaseCleaner[:mongoid].clean   # commented out. to be enabled to check data after test failed.
     EOS
-
   end
 
   # Windows特有の処理を定義
@@ -448,15 +499,8 @@ insert_into_file 'spec/spec_helper.rb', after: 'RSpec.configure do |config|' do
   # 挿入する文字列本体 ※EOSの後ろに改行を入れておかないと、do |config|の真後ろから挿入される
   <<-"EOS"
 
-  Capybara.javascript_driver = :poltergeist
-
-  Capybara.register_driver :poltergeist do |app|
-    #{phantomjs_path_windows}
-    Capybara::Poltergeist::Driver.new(app, options)
-  end
-
   config.before(:all) do
-    FactoryGirl.reload
+    FactoryBot.reload
   end
 
   config.before(:suite) do
@@ -466,10 +510,12 @@ insert_into_file 'spec/spec_helper.rb', after: 'RSpec.configure do |config|' do
     #{mongo_before_suite}
   end
 
-  config.before :each do
+  config.before :each do |example|
     # DatabaseCleaner.start
 
     #{mongo_before_each}
+
+    #{system_test_case}
   end
 
   config.after :each do
@@ -478,9 +524,13 @@ insert_into_file 'spec/spec_helper.rb', after: 'RSpec.configure do |config|' do
     #{mongo_after_each}
   end
 
-  # config.include FactoryGirl::Syntax::Methods
   EOS
 end
+
+# spec/support
+FileUtils.mkdir_p "spec/support"
+get File.expand_path('../spec/support/capybara.rb', __FILE__), 'spec/support/capybara.rb'
+get File.expand_path('../spec/support/factory_bot.rb', __FILE__), 'spec/support/factory_bot.rb'
 
 
 if use_mongodb
